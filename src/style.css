@@ -49,6 +49,21 @@ body {
   color: var(--text-dark);
 }
 
+button {
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 0.5em;
+  cursor: pointer;
+  height: 2rem;
+}
+
+select {
+  height: 2rem;
+  border-radius: 0.5em;
+  border: 1px solid white;
+  padding: 0.5em;
+}
+
 #app {
   margin: 0;
   padding: 0;
@@ -57,7 +72,7 @@ body {
   width: 100%;
 
   display: grid;
-  grid-template-rows: 5rem calc(100vh - 10rem) 5rem;
+  grid-template-rows: 10rem calc(100vh - 15rem) 5rem;
   overflow: hidden;
 }
 
@@ -74,6 +89,7 @@ body {
     color: var(--text-light);
   }
   button {
-    background-color: var(--background-light);
+    background-color: white;
+    color: var(--text-light);
   }
 }

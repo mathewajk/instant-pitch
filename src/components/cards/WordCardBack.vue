@@ -1,30 +1,27 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { RouterLink } from 'vue-router';
+import type { Word } from '@/stores/word';
 
 defineProps<{
-    word: {
-        tango: string,
-        kana: string,
-        pitch: number,
-        source: string,
-        definition_ja: string,
-        definition_en: string,
-    }
+    word: Word
 }>()
 
 defineEmits<{
-    click: []
+    showDetails: []
 }>()
 
 const showEnglish = ref(false);
+
 </script>
 
 <template>
-    <div class="word-back" @click="$emit('click')">
-        <div class="definition-ja" @click.stop>{{ word.definition_ja }}</div>
+    <div class="word-back">
+        <div class="definition definition-ja" @click.stop>{{ word.definition_jp }}</div>
         <div class="translation-container">
-            <div v-if="showEnglish" class="definition-en">{{ word.definition_en }}</div>
-            <div v-else class="definition-toggle" @click.stop="showEnglish = true">Show translation</div>
+            <div v-if="showEnglish" class="definition definition-en">{{ word.definition_en }}</div>
+            <div v-else class="card-toggle" @click.stop="showEnglish = true">Show translation</div>
+            <div class="card-toggle"><RouterLink :to="`/word/${word.tango}`">Show more</RouterLink></div>
         </div>
     </div>
 </template>
@@ -39,20 +36,33 @@ const showEnglish = ref(false);
     font-size: 1.2em;
 }
 
-.definition-ja {
+.definition {
     z-index: 10;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;  
+}
+
+.definition.definition-ja {
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+}
+
+.definition.definition-en {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
 }
 
 .translation-container {
     text-align: center;
 }
 
-.definition-toggle {
+.card-toggle {
     z-index: 10;
     text-decoration: underline;
 }
 
-.definition-toggle:hover {
+.card-toggle:hover {
     cursor: pointer;
 }
 </style>

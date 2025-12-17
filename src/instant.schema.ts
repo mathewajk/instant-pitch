@@ -13,6 +13,15 @@ const _schema = i.schema({
       imageURL: i.string().optional(),
       type: i.string().optional(),
     }),
+    words: i.entity({
+      context: i.string().optional(),
+      definition_en: i.string().optional(),
+      definition_jp: i.string().optional(),
+      pitch: i.number().indexed(),
+      source: i.string().optional(),
+      tango: i.string().indexed(),
+      yomi: i.string(),
+    }),
   },
   links: {
     $usersLinkedPrimaryUser: {
