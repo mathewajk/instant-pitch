@@ -1,42 +1,32 @@
-import { ref, computed } from 'vue'
+import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { init, id, type InstaQLEntity } from '@instantdb/core';
+import { init } from "@dorilama/instantdb-vue";
+import type { InstaQLParams, InstaQLResult } from "@dorilama/instantdb-vue";
 import schema from '../instant.schema.ts';
 
 const APP_ID = import.meta.env.VITE_INSTANT_APP_ID;
 
-type Word = InstaQLEntity<typeof schema, "words">;
-export type { Word };
+const wordsQuery = { words: { } } satisfies InstaQLParams<typeof schema>;
+type WordsResult = InstaQLResult<typeof schema, typeof wordsQuery>;
+export type Word = WordsResult["words"][number];
 
 export const useWordStore = defineStore('word', () => {
 
-    const db = init({ appId: APP_ID, schema });
-  
-    const error = ref('')
-    const words = ref(<Word[]>[])
-    const loading = ref(false);
+  const db = init({ appId: APP_ID, schema });
 
-    const startLoading = () => {
-      loading.value = true;
-    }
+  const loading = ref(false);
 
-    const stopLoading = () => {
-      loading.value = false;
-    }
+  const startLoading = () => {
+    loading.value = true;
+  }
 
-    const subscribeWords = (query: { words: any }) => {
-      db.subscribeQuery(query, (resp) => {
-        if (resp.error) {
-          stopLoading();
-          error.value = resp.error.message;
-        }
-        if (resp.data) {
-          stopLoading();
-          words.value = resp.data.words as Word[];
-          console.log(words.value);
-        }
-      });
-    }
+  const stopLoading = () => {
+    loading.value = false;
+  }
+
+  const subscribe = (query: { words: any }) => {
+    return db.useQuery(query);
+  }
 
   const createWord = (word: Word) => {
     // @ts-ignore
@@ -65,5 +55,5 @@ export const useWordStore = defineStore('word', () => {
   const isNakadaka = (word: Word) => !isHeiban(word) && !isAtamadaka(word) && !isOdaka(word);
   const isOdaka = (word: Word) => !isAtamadaka(word) && word.pitch === getMorae(word.yomi).length;
 
-  return { getMorae, isHeiban, isAtamadaka, isNakadaka, isOdaka, subscribeWords, createWord, startLoading, stopLoading, words, error, loading}
+  return { getMorae, isHeiban, isAtamadaka, isNakadaka, isOdaka, subscribe, createWord, startLoading, stopLoading, loading}
 })
