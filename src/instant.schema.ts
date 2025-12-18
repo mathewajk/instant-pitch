@@ -9,9 +9,9 @@ const _schema = i.schema({
       url: i.string(),
     }),
     $users: i.entity({
-      admin: i.boolean().optional(),
       email: i.string().unique().indexed().optional(),
       imageURL: i.string().optional(),
+      is_admin: i.boolean().optional(),
       type: i.string().optional(),
     }),
     words: i.entity({

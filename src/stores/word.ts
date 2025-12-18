@@ -13,7 +13,6 @@ export type Word = WordsResult["words"][number];
 export const useWordStore = defineStore('word', () => {
 
   const db = init({ appId: APP_ID, schema });
-
   const loading = ref(false);
 
   const startLoading = () => {

@@ -24,16 +24,11 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
-.card {
-    padding: 2em;
-    border-radius: 1em;
-    background-color: white;
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-    width: 10vw;
-    height: 10vw;
-    min-width: 250px;
-    min-height: 250px;
-    color: var(--text-light);
+.card {  
+  width: 10vw;
+  height: 10vw;
+  min-width: 250px;
+  min-height: 250px;
 }
 
 .card:hover {

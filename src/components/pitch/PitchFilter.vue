@@ -54,7 +54,6 @@ const emit = defineEmits<{
     display: flex;
     flex-direction: row;
     gap: 1em;
-    align-self: flex-end;
 }
 </style>
 

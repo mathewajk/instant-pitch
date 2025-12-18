@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import PitchDisplay from './pitch/PitchDisplay.vue';
+import PitchDisplay from '../pitch/PitchDisplay.vue';
 import { ref, computed, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useWordStore } from '@/stores/word';
@@ -65,47 +65,58 @@ document.addEventListener('keydown', (event) => {
 </script>
 
 <template>
-    <div class="form-container">
-        <span class="sr-only">Back to home</span>
-        <button class="back-button" @click="$router.back()">Back</button>
-    </div>
-    <template v-if="!loading || activeWord">
-        <div class="card-container">
-            <div class="card-navigation previous-word">
-                <template v-if="previousWord">
-                    <span class="sr-only">Previous word: {{ previousWord.tango }}</span>
-                    <button @click="showPreviousWord">{{ previousWord.tango }}</button>
-                </template>
-            </div>
-            <div class="card">
-                <div v-if="activeWord" id="word-details-container" :data-tango="activeWord.tango">
-                    <div class="headword-container">
-                        <h1>{{ activeWord.tango }}</h1>
-                        <PitchDisplay :yomi="activeWord.yomi" :pitch="activeWord.pitch" />
-                    </div>
-                    <div id="word-details">
-                        <div class="definition-jp">{{ activeWord.definition_jp }}</div>
-                        <div v-if="showEnglish" class="definition-en">{{ activeWord.definition_en }}</div>
-                        <div v-else class="card-toggle" @click="showEnglish = true">Show translation</div>
-                        <div class="context">{{ activeWord.context }}</div>
-                        <div class="source">Source: {{ activeWord.source }}</div>
+    <div class="word-details-wrapper">
+        <div class="form-container">
+            <RouterLink to="/">
+                < Back to word list
+            </RouterLink>
+        </div>
+        <template v-if="!loading || activeWord">
+            <div class="card-container">
+                <div class="card-navigation previous-word">
+                    <template v-if="previousWord">
+                        <span class="sr-only">Previous word: {{ previousWord.tango }}</span>
+                        <button @click="showPreviousWord">{{ previousWord.tango }}</button>
+                    </template>
+                </div>
+                <div class="card">
+                    <div v-if="activeWord" id="word-details-container" :data-tango="activeWord.tango">
+                        <div class="headword-container">
+                            <h1>{{ activeWord.tango }}</h1>
+                            <PitchDisplay :yomi="activeWord.yomi" :pitch="activeWord.pitch" />
+                        </div>
+                        <div id="word-details">
+                            <div class="definition-jp">{{ activeWord.definition_jp }}</div>
+                            <div v-if="showEnglish" class="definition-en">{{ activeWord.definition_en }}</div>
+                            <div v-else class="card-toggle" @click="showEnglish = true">Show translation</div>
+                            <div class="context">{{ activeWord.context }}</div>
+                            <div class="source">Source: {{ activeWord.source }}</div>
+                        </div>
                     </div>
                 </div>
+                <div class="card-navigation next-word">
+                    <template v-if="nextWord">
+                        <span class="sr-only">Next word: {{ nextWord.tango }}</span>
+                        <button @click="showNextWord">{{ nextWord.tango }}</button>
+                    </template>
+                </div>
             </div>
-            <div class="card-navigation next-word">
-                <template v-if="nextWord">
-                    <span class="sr-only">Next word: {{ nextWord.tango }}</span>
-                    <button @click="showNextWord">{{ nextWord.tango }}</button>
-                </template>
+            <div class="hint-container">
+                <div class="hint">Tip: Use the arrow keys to navigate between words!</div>
             </div>
-        </div>
-        <div class="hint-container">
-            <div class="hint">Tip: Use the arrow keys to navigate between words!</div>
-        </div>
-    </template>
+        </template>
+    </div>
 </template>
 
 <style scoped>
+    .word-details-wrapper {
+        height: 100%;
+        width: 100%;
+        display: grid;
+        grid-template-rows: 1fr 3fr 1fr;
+        overflow: hidden;
+    }
+
     .card-container {
         width: 100%;
         display: grid;
@@ -122,6 +133,7 @@ document.addEventListener('keydown', (event) => {
     .card-container .card-navigation button {
         font-size: 1.2em;
         background-color: var(--button-dark);
+        color: var(--text-dark);
         border-radius: 10px;
         transition: background-color 0.3s ease;
     }
@@ -254,11 +266,29 @@ document.addEventListener('keydown', (event) => {
     }
     
     .hint-container {
+        padding-top: 3em;
         text-align: center;
     }
 
     .hint {
         font-size: 0.8em;
         color: #000000;
+    }
+
+    .form-container {
+        padding: 2rem;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+    }
+
+    .form-container a {
+        font-size: 1.2em;
+        color: black;
+        text-decoration: underline;
+    }
+
+    .form-container a:hover {
+        color: var(--text-light);
     }
 </style>
