@@ -7,7 +7,7 @@ import { useWordStore } from '@/stores/word';
 import type { Word } from '@/stores/word';
 const store = useWordStore();
 
-const emptyWord = {
+const createEmptyWord = (): Word => ({
   id: id(),
   tango: '',
   yomi: '',
@@ -16,9 +16,9 @@ const emptyWord = {
   definition_jp: '',
   definition_en: '',
   context: ''
-};
+});
 
-const newWord = ref<Word>(emptyWord);
+const newWord = ref<Word>(createEmptyWord());
 const formErrors = ref<{ field: string, message: string }[]>([]);
 
 const validateForm = () => {
@@ -43,19 +43,8 @@ const handleSubmit = () => {
   if (formErrors.value.length > 0) {
     return;
   }
-  store.createWord({
-    id: id(),
-    tango: newWord.value.tango,
-    yomi: newWord.value.yomi,
-    pitch: newWord.value.pitch,
-    source: newWord.value.source,
-    definition_jp: newWord.value.definition_jp,
-    definition_en: newWord.value.definition_en,
-    context: newWord.value.context
-  });
-  
-  // Reset form
-  newWord.value = {...emptyWord}
+  store.createWord(newWord.value);
+  newWord.value = createEmptyWord();
 };
 
 </script>
