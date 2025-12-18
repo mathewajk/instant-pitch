@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 
 import WordCard from './cards/WordCard.vue'
-import WordDetails from './WordDetails.vue'
 import PitchFilter from './PitchFilter.vue'
 import WordForm from './WordForm.vue'
 
@@ -12,20 +11,13 @@ import type { Word } from '@/stores/word';
 const store = useWordStore();
 
 const filterByPitch = ref<Function | null>(null);
-const filteredWords = computed(() => {
-  return store.words.filter((word:Word) => filterByPitch.value ? filterByPitch.value(word) : true);
-})
 
 const baseQuery = { words: { $: {order: { tango: 'asc' } } } };
-onMounted(() => {
-  store.subscribeWords(baseQuery);
-  store.startLoading();
-})
+const { isLoading, error, data } = store.subscribe(baseQuery);
 
-const activeWord = ref<Word | null>(null);
-const showDetails = (word: Word) => {
-  activeWord.value = word;
-}
+const filteredWords = computed(() => {
+  return data.value?.words.filter((word) => filterByPitch.value ? filterByPitch.value(word) : true);
+})
 </script>
 
 <template>
@@ -33,20 +25,19 @@ const showDetails = (word: Word) => {
         <PitchFilter @change="filterByPitch = $event" />
         <WordForm />
     </div>
-    <div class="words-container" v-if="!store.loading && !activeWord">
-        <div class="words" v-if="filteredWords.length > 0">
-            <WordCard v-for="word in filteredWords" :key="word.tango" :word="word" @showDetails="showDetails(word)" />
+    <div class="words-container" v-if="!isLoading">
+        <div class="words" v-if="filteredWords && filteredWords.length > 0">
+            <WordCard v-for="word in filteredWords" :key="word.tango" :word="word as Word" />
         </div>
         <div class="words" v-else>
             <p>No words found!</p>
         </div>
     </div>
-    <WordDetails v-if="activeWord" :word="activeWord" @hideDetails="activeWord = null" />
     <div class="loading" v-if="store.loading">
     Loading...
     </div>
     <div class="word-count">
-        {{ filteredWords.length }} word(s)
+        {{ filteredWords?.length || 0 }} word(s)
     </div>
 </template>
 
