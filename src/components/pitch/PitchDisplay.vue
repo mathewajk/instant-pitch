@@ -31,6 +31,7 @@ defineProps<{
     position: relative;
     display: block;
     margin-bottom: 1em;
+    font-family: 'Noto Sans', Arial, sans-serif;
 }
 
 .mora {

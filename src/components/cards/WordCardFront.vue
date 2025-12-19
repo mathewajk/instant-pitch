@@ -36,6 +36,7 @@ const props = defineProps<{
 
 .tango {
     font-size: 2em;
+    font-family: 'Noto Sans', Arial, sans-serif;
 }
 
 .sr-only {

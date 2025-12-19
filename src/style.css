@@ -5,8 +5,22 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('/src/assets/fonts/NotoSansJP-Medium.otf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('/src/assets/fonts/NotoSansJP-Regular.otf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
 :root {
-  font-family: 'Lato', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Lato', Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
