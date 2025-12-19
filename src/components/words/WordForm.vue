@@ -47,6 +47,10 @@ const handleSubmit = () => {
   newWord.value = createEmptyWord();
 };
 
+const emit = defineEmits<{
+    (e: 'close'): void
+  }>();
+
 </script>
 
 <template>

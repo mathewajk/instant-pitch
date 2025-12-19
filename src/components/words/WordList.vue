@@ -18,15 +18,15 @@ const { isLoading, error, data } = store.subscribe(baseQuery);
 
 const filteredWords = computed(() => {
   return data.value?.words.filter((word) => filterByPitch.value ? filterByPitch.value(word) : true);
-})
+});
 
 const { open, close } = useModal({
   component: WordForm,
   attrs: {
-    "onClose"() {
-        close()
+    onClose() {
+      close()
     },
-  }
+  },
 });
 
 </script>
