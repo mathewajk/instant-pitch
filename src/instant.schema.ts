@@ -17,7 +17,7 @@ const _schema = i.schema({
     words: i.entity({
       context: i.string().optional(),
       definition_en: i.string().optional(),
-      definition_jp: i.string().optional(),
+      definition_ja: i.string().optional(),
       pitch: i.number().indexed(),
       source: i.string().optional(),
       tango: i.string().indexed(),
