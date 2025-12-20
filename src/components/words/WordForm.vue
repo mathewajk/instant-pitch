@@ -13,7 +13,7 @@ const createEmptyWord = (): Word => ({
   yomi: '',
   pitch: 0,
   source: '',
-  definition_jp: '',
+  definition_ja: '',
   definition_en: '',
   context: ''
 });
@@ -96,9 +96,9 @@ const emit = defineEmits<{
       </div>
       <div class="form-group">
         <label for="definition_ja">Definition (JA)</label>
-        <textarea v-model="newWord.definition_jp" rows="3"/>
-        <div class="form-error" v-if="getErrorMessage('definition_jp')">
-          {{ getErrorMessage('definition_jp') }}
+        <textarea v-model="newWord.definition_ja" rows="3"/>
+        <div class="form-error" v-if="getErrorMessage('definition_ja')">
+          {{ getErrorMessage('definition_ja') }}
         </div>
       </div>
       <div class="form-group">
