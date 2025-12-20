@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import PitchDisplay from '../pitch/PitchDisplay.vue';
-import { ref, computed, watchEffect, reactive } from 'vue';
+import WordDetailsCard from '../details/WordDetailsCard.vue';
+import WordNavigationButton from '../details/WordNavigationButton.vue';
+import { ref, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useWordStore } from '@/stores/word';
 import type { Word } from '@/stores/word';
@@ -9,17 +10,8 @@ const route = useRoute();
 const router = useRouter();
 const store = useWordStore();
 
-const showEnglish = ref(false);
-
-const showPreviousWord = () => {
-    showEnglish.value = false;
-    router.push(`/word/${previousWord.value?.tango}`);
-};
-
-const showNextWord = () => {
-    showEnglish.value = false;
-    router.push(`/word/${nextWord.value?.tango}`);
-};
+const showPreviousWord = () => router.push(`/word/${previousWord.value?.tango}`);
+const showNextWord = () => router.push(`/word/${nextWord.value?.tango}`);
 
 const loading = ref(false);
 const activeWord = ref<Word | null>(null);
@@ -58,20 +50,22 @@ watchEffect(() => {
     });
 });
 
-document.addEventListener('keydown', (event) => {
+const allowedKeys = ['ArrowLeft', 'ArrowRight', 'Escape'];
+const handleKeydown = (event: KeyboardEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     if (event.key === 'ArrowLeft' && previousWord.value) {
-        event.preventDefault();
-        event.stopPropagation();
         showPreviousWord();
     } else if (event.key === 'ArrowRight' && nextWord.value) {
-        event.preventDefault();
-        event.stopPropagation();
         showNextWord();
-    }
-    if (event.key === 'Escape') {
-        event.preventDefault();
-        event.stopPropagation();
+    } else if (event.key === 'Escape') {
         router.push('/');
+    }
+}
+
+document.addEventListener('keydown', (event) => {
+    if (allowedKeys.includes(event.key)) {
+        handleKeydown(event);
     }
 });
 </script>
@@ -85,33 +79,11 @@ document.addEventListener('keydown', (event) => {
         </div>
         <template v-if="!loading || activeWord">
             <div class="card-wrapper">
-                <div class="card-navigation previous-word">
-                    <template v-if="previousWord">
-                        <span class="sr-only">Previous word: {{ previousWord.tango }}</span>
-                        <button @click="showPreviousWord">{{ previousWord.tango }}</button>
-                    </template>
-                </div>
+                <WordNavigationButton direction="previous" :word="previousWord" @click="showPreviousWord" />
                 <div class="card">
-                    <div v-if="activeWord" id="word-details-container" :data-tango="activeWord?.tango">
-                        <div class="headword-container">
-                            <h1>{{ activeWord.tango }}</h1>
-                            <PitchDisplay v-if="activeWord" :yomi="activeWord.yomi" :pitch="activeWord.pitch" />
-                        </div>
-                        <div id="word-details">
-                            <div class="definition-ja">{{ activeWord.definition_ja }}</div>
-                            <div v-if="showEnglish" class="definition-en">{{ activeWord.definition_en }}</div>
-                            <div v-else class="card-toggle" @click="showEnglish = true">Show translation</div>
-                            <div class="context">{{ activeWord.context }}</div>
-                            <div class="source">Source: {{ activeWord.source }}</div>
-                        </div>
-                    </div>
+                    <WordDetailsCard :active-word="activeWord" />
                 </div>
-                <div class="card-navigation next-word">
-                    <template v-if="nextWord">
-                        <span class="sr-only">Next word: {{ nextWord.tango }}</span>
-                        <button @click="showNextWord">{{ nextWord.tango }}</button>
-                    </template>
-                </div>
+                <WordNavigationButton direction="next" :word="nextWord" @click="showNextWord" />
             </div>
             <div class="hint-container">
                 <RouterLink to="/" class="btn">Back to Word List</RouterLink>
@@ -139,63 +111,6 @@ document.addEventListener('keydown', (event) => {
         justify-items: center;
         align-items: center;
         gap: 1em;
-
-        .card-navigation {
-            flex: 0;
-            button {
-                position: relative;
-                height: fit-content;
-                width: max-content;
-
-                color: var(--text-dark);
-                font-size: 1.2em;
-                text-decoration: underline;
-                
-                background-color: var(--button-dark);
-                border-radius: 10px;
-                transition: background-color 0.3s ease;
-
-                &::after, &::before {
-                    height: 20px;
-                    width: 20px;
-                    position: absolute;
-                    transition: background-color 0.3s ease;
-                }
-
-                &:hover {
-                    background-color: var(--button-dark-hover);
-                    &::after, &::before {
-                        transition: background-color 0.3s ease;
-                    }
-                }
-            }
-
-            &.next-word {
-                button {
-                    padding: 1em 1.5em 1em 1em;
-                    
-                    &::after {
-                        content: url('/src/assets/icons/chevron-right.svg');
-                        margin-left: 0.5em;
-                        top: 1.1em;
-                        right: 0.5em;
-                    }
-                }
-            }
-
-            &.previous-word {
-                button {
-                    padding: 1em 1em 1em 1.5em;
-                    
-                    &::before {
-                        content: url('/src/assets/icons/chevron-left.svg');
-                        margin-right: 0.5em;
-                        top: 1.1em;
-                        left: 0.5em;
-                    }
-                }
-            }
-        }
     }
 
     .card {
@@ -221,90 +136,6 @@ document.addEventListener('keydown', (event) => {
     }
 }
 
-#word-details-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
-    gap: 2em;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    height: 100%;
-
-    @media (max-width: 1024px) {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2em;
-    }
-
-    .pitch-display {
-        margin-bottom: 0;
-        font-size: 2em;
-    }
-
-    #word-details {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 2em;
-    }
-    
-    .headword-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1em;
-        border-right: 1px solid #ccc;
-        align-items: center;
-
-        justify-content: center;
-
-        @media (min-width: 1024px) {
-            height: 100%;
-        }
-        
-        @media (max-width: 1024px) {
-            width: 100%;
-            border-right: none;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 2em;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 6rem;
-            line-height: 1;
-            overflow-wrap: break-word;
-            hyphens: auto;
-        }
-    }
-}
-
-    #word-details .context {
-        border-left: 2px solid #ccc;
-        padding-left: 1em;
-        color: #666;
-    }
-
-    #word-details .source {
-        color: #666;
-        font-size: 0.8em;
-    }
-
-    #word-details .definition-ja {
-        font-size: 1.2em;
-    }
-
-    #word-details .card-toggle {
-        text-decoration: underline;
-    }
-
-    #word-details .card-toggle:hover {
-        cursor: pointer;
-    }
-    
 .hint-container {
     display: flex;
     flex-direction: column;
