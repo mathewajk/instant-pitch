@@ -17,7 +17,11 @@ const baseQuery = { words: { $: {order: { yomi: 'asc' } } } };
 const { isLoading, error, data } = store.subscribe(baseQuery);
 
 const filteredWords = computed(() => {
-  return data.value?.words.filter((word) => filterByPitch.value ? filterByPitch.value(word) : true);
+  return data.value?.words
+    .filter((word) => filterByPitch.value ? filterByPitch.value(word) : true)
+    .filter((word) => {
+      return word.tango.toLowerCase().includes(search.value.toLowerCase()) || word.yomi.toLowerCase().includes(search.value.toLowerCase());
+    });
 });
 
 const { open, close } = useModal({
@@ -29,12 +33,15 @@ const { open, close } = useModal({
   },
 });
 
+const search = ref('');
+
 </script>
 
 <template>
   <div class="word-list-wrapper">
     <div class="form-container">  
         <PitchFilter @change="filterByPitch = $event" />
+        <input id="search" type="text" v-model="search" placeholder="単語を検索" />
         <button @click="open">Add words</button>
     </div>
     <div class="words-container" v-if="!isLoading">
@@ -49,7 +56,7 @@ const { open, close } = useModal({
     Loading...
     </div>
     <div class="word-count">
-            {{ filteredWords?.length || 0 }} word(s)
+      {{ filteredWords?.length || 0 }} word(s)
     </div>
   </div>
 </template>
@@ -60,7 +67,7 @@ const { open, close } = useModal({
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-rows: minmax(10rem, fit-content) calc(100vh - 15rem) 5rem;
+  grid-template-rows: 4rem calc(100vh - 12rem) 5rem;
   overflow: hidden;
 
   > div {
@@ -68,10 +75,10 @@ const { open, close } = useModal({
   }
 
   .words-container {
-    max-height: calc(100vh - 10rem);
     overflow-y: scroll;
 
     .words {
+      padding: 0;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
@@ -84,6 +91,12 @@ const { open, close } = useModal({
     flex-direction: row;
     gap: 1em;
     align-items: flex-end;
+  }
+
+  #search {
+    border-radius: 0.5em;
+    border: 1px solid #ccc;
+    padding: 0.5em;
   }
 }
 </style>
