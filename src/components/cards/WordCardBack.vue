@@ -4,36 +4,38 @@ import { RouterLink } from 'vue-router';
 import type { Word } from '@/stores/word';
 
 defineProps<{
-    word: Word
+    word: Word,
+    showEnglish: boolean
 }>()
 
 defineEmits<{
     showDetails: []
 }>()
 
-const showEnglish = ref(false);
-
 </script>
 
 <template>
     <div class="word-back">
-        <div class="definition definition-ja" @click.stop>{{ word.definition_jp }}</div>
-        <div class="translation-container">
-            <div v-if="showEnglish" class="definition definition-en">{{ word.definition_en }}</div>
-            <div v-else class="card-toggle" @click.stop="showEnglish = true">Show translation</div>
-            <div class="card-toggle"><RouterLink :to="`/word/${word.tango}`">Show more</RouterLink></div>
-        </div>
+        <h2 class="tango">{{ word.tango }}</h2>
+        <div v-if="showEnglish" class="definition definition-en">{{ word.definition_en }}</div>
+        <div v-else class="definition definition-ja">{{ word.definition_ja }}</div>
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
+
 .word-back {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     font-size: 1.2em;
+
+    h2.tango {
+        font-size: 1.25em;
+        text-align: center;
+        margin: 0 0 1em 0;
+    }
 }
 
 .definition {
@@ -41,16 +43,8 @@ const showEnglish = ref(false);
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;  
-}
-
-.definition.definition-ja {
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
-}
-
-.definition.definition-en {
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
 }
 
 .translation-container {
