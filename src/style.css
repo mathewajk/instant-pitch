@@ -21,6 +21,7 @@
 
 :root {
   font-family: 'Lato', Arial, sans-serif;
+  font-family: 'Noto Sans', Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -28,12 +29,20 @@
 
   --background-dark: rgb(72, 72, 176);
   --background-light: rgb(37, 124, 159);
+
   --text-dark: rgba(255, 255, 255, 0.87);
-  --text-light: rgb(36, 46, 43);
+  --text-dark-hover: rgba(255, 255, 255, 0.5);
+  --text-light: rgb(33, 34, 34);
+  --text-light-hover: rgb(12, 12, 12);
+
   --button-dark: rgb(33, 34, 34);
   --button-dark-hover: rgb(12, 12, 12);
+
   --button-light: rgb(245, 245, 245);
   --button-light-hover: rgb(229, 229, 229);
+
+  --mora-peak: rgb(165, 70, 249);
+  --mora-low: var(--text-light);
 
   color: var(--text-dark);
   background-color: var(--background-dark);
