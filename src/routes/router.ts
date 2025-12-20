@@ -1,15 +1,15 @@
 import { createWebHistory, createRouter } from 'vue-router'
 
-import HomeView from '../components/views/HomeView.vue'
-import WordDetails from '../components/views/WordDetails.vue'
-import UserLogin from '../components/views/UserLogin.vue'
+import ListView from '../components/views/ListView.vue'
+import DetailView from '../components/views/DetailView.vue'
+import LoginView from '../components/views/LoginView.vue'
 
 import { useUserStore } from '@/stores/user';
 
 const routes = [
-  { name: 'Home', path: '/', component: HomeView },
-  { name: 'WordDetails', path: '/word/:tango', component: WordDetails },
-  { name: 'Login', path: '/login', component: UserLogin },
+  { name: 'Home', path: '/', component: ListView },
+  { name: 'Details', path: '/word/:tango', component: DetailView },
+  { name: 'Login', path: '/login', component: LoginView },
 ]
 
 const router = createRouter({
