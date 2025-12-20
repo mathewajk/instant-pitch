@@ -59,14 +59,44 @@ export const useWordStore = defineStore('word', () => {
     return subscribe(activeWordQuery);
   }
 
-  const getPreviousWord = (yomi: string) => {
-    const previousWordQuery = { words: { $: { limit: 1, order: { yomi: 'desc' }, where: { yomi: { $lt: yomi } } } } };
-    return subscribe(previousWordQuery);
+  const getAllWords = () => {
+    const allWordsQuery = { words: { $: { order: { tango: 'asc' } } } };
+    return subscribe(allWordsQuery);
   }
 
-  const getNextWord = (yomi: string) => {
-    const nextWordQuery = { words: { $: { limit: 1, order: { yomi: 'asc' }, where: { yomi: { $gt: yomi } } } } };
-    return subscribe(nextWordQuery);
+  const sortWords = (words: Word[]) => {
+    return [...words].sort((a, b) => {
+      if (a.yomi !== b.yomi) {
+        return a.yomi.localeCompare(b.yomi);
+      }
+      return a.tango.localeCompare(b.tango);
+    });
+  }
+
+  const findPreviousWord = (words: Word[], currentWord: Word): Word | null => {
+    if (!words || words.length === 0 || !currentWord) return null;
+    
+    const sortedWords = sortWords(words);
+    const currentIndex = sortedWords.findIndex(w => w.tango === currentWord.tango);
+    
+    if (currentIndex === -1) return null;
+    if (currentIndex === 0) return null; // No previous word
+    
+    const previousWord = sortedWords[currentIndex - 1];
+    return previousWord || null;
+  }
+
+  const findNextWord = (words: Word[], currentWord: Word): Word | null => {
+    if (!words || words.length === 0 || !currentWord) return null;
+    
+    const sortedWords = sortWords(words);
+    const currentIndex = sortedWords.findIndex(w => w.tango === currentWord.tango);
+    
+    if (currentIndex === -1) return null;
+    if (currentIndex === sortedWords.length - 1) return null; // No next word
+    
+    const nextWord = sortedWords[currentIndex + 1];
+    return nextWord || null;
   }
 
   const isHeiban = (word: Word) => word.pitch === 0;
@@ -74,5 +104,5 @@ export const useWordStore = defineStore('word', () => {
   const isNakadaka = (word: Word) => !isHeiban(word) && !isAtamadaka(word) && !isOdaka(word);
   const isOdaka = (word: Word) => !isAtamadaka(word) && word.pitch === getMorae(word.yomi).length;
 
-  return { getMorae, isHeiban, isAtamadaka, isNakadaka, isOdaka, subscribe, createWord, startLoading, stopLoading, getActiveWord, getPreviousWord, getNextWord, loading, activeWord, previousWord, nextWord}
+  return { getMorae, isHeiban, isAtamadaka, isNakadaka, isOdaka, subscribe, createWord, startLoading, stopLoading, getActiveWord, getAllWords, findPreviousWord, findNextWord, loading, activeWord, previousWord, nextWord}
 })
