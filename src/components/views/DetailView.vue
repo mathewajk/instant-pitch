@@ -34,18 +34,15 @@ watchEffect(() => {
             return;
         }
 
-        const yomi = activeWord.value.yomi;
-        const { data: previousWordData, isLoading: previousWordLoading } = store.getPreviousWord(yomi);
-        const { data: nextWordData, isLoading: nextWordLoading } = store.getNextWord(yomi);
+        const { data: allWordsData, isLoading: allWordsLoading } = store.getAllWords();
 
         watchEffect(() => {
-            if (!previousWordLoading.value) {   
-                previousWord.value = (previousWordData.value?.words[0] as Word) || null;
+            if (!allWordsLoading.value && allWordsData.value?.words && activeWord.value) {
+                const words = allWordsData.value.words as Word[];
+                previousWord.value = store.findPreviousWord(words, activeWord.value!);
+                nextWord.value = store.findNextWord(words, activeWord.value!);
             }
-            if (!nextWordLoading.value) {
-                nextWord.value = (nextWordData.value?.words[0] as Word) || null;
-            }
-            loading.value = activeWordLoading.value || previousWordLoading.value || nextWordLoading.value;
+            loading.value = activeWordLoading.value || allWordsLoading.value;
         });
     });
 });
@@ -73,7 +70,7 @@ document.addEventListener('keydown', (event) => {
 <template>
     <div class="word-details-wrapper">
         <div class="breadcrumbs">
-            <RouterLink to="/">word list</RouterLink>
+            <RouterLink to="/">words</RouterLink>
             <span class="separator"><img src="/src/assets/icons/chevron-right.svg" alt="separator" /></span> 
             <RouterLink to="/word/{{ route.params.tango }}">{{ route.params.tango }}</RouterLink>
         </div>
@@ -101,7 +98,7 @@ document.addEventListener('keydown', (event) => {
     width: 100%;
 
     display: grid;
-    grid-template-rows: 3em 5fr 1fr;
+    grid-template-rows: 4em 5fr 1fr;
     overflow: hidden;
 
     .card-wrapper {
@@ -117,7 +114,7 @@ document.addEventListener('keydown', (event) => {
         padding: 2em;
         height: 100%;
 
-        min-width: 800px;
+        min-width: 700px;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -170,6 +167,7 @@ document.addEventListener('keydown', (event) => {
     align-items: center;
     gap: 0.5em;
     font-size: 1em;
+    padding: 1em;
 
     a {
         color: var(--text-light);

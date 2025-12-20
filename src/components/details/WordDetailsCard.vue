@@ -84,6 +84,8 @@ const showEnglish = ref(false);
             line-height: 1;
             overflow-wrap: break-word;
             hyphens: auto;
+            text-align: center;
+            margin-bottom: 1rem;
         }
     }
 }
