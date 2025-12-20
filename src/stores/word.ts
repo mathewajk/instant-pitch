@@ -1,5 +1,6 @@
-import { ref, computed, type Ref } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
+
 import { init } from "@dorilama/instantdb-vue";
 import type { InstaQLParams, InstaQLResult } from "@dorilama/instantdb-vue";
 import schema from '../instant.schema.ts';
@@ -49,10 +50,29 @@ export const useWordStore = defineStore('word', () => {
     return morae;
   }
 
+  const activeWord = ref<Word | null>(null);
+  const previousWord = ref<Word | null>(null);
+  const nextWord = ref<Word | null>(null);
+
+  const getActiveWord = (tango: string) => {
+    const activeWordQuery = { words: { $: { limit: 1, where: { tango: tango } } } };
+    return subscribe(activeWordQuery);
+  }
+
+  const getPreviousWord = (yomi: string) => {
+    const previousWordQuery = { words: { $: { limit: 1, order: { yomi: 'desc' }, where: { yomi: { $lt: yomi } } } } };
+    return subscribe(previousWordQuery);
+  }
+
+  const getNextWord = (yomi: string) => {
+    const nextWordQuery = { words: { $: { limit: 1, order: { yomi: 'asc' }, where: { yomi: { $gt: yomi } } } } };
+    return subscribe(nextWordQuery);
+  }
+
   const isHeiban = (word: Word) => word.pitch === 0;
   const isAtamadaka = (word: Word) => word.pitch === 1;
   const isNakadaka = (word: Word) => !isHeiban(word) && !isAtamadaka(word) && !isOdaka(word);
   const isOdaka = (word: Word) => !isAtamadaka(word) && word.pitch === getMorae(word.yomi).length;
 
-  return { getMorae, isHeiban, isAtamadaka, isNakadaka, isOdaka, subscribe, createWord, startLoading, stopLoading, loading}
+  return { getMorae, isHeiban, isAtamadaka, isNakadaka, isOdaka, subscribe, createWord, startLoading, stopLoading, getActiveWord, getPreviousWord, getNextWord, loading, activeWord, previousWord, nextWord}
 })
