@@ -13,7 +13,7 @@ import type { Word } from '@/stores/word';
 const store = useWordStore();
 
 const filterByPitch = ref<Function | null>(null);
-const baseQuery = { words: { $: {order: { tango: 'asc' } } } };
+const baseQuery = { words: { $: {order: { yomi: 'asc' } } } };
 const { isLoading, error, data } = store.subscribe(baseQuery);
 
 const filteredWords = computed(() => {
@@ -54,7 +54,7 @@ const { open, close } = useModal({
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 
 .word-list-wrapper {
   height: 100%;
@@ -62,29 +62,28 @@ const { open, close } = useModal({
   display: grid;
   grid-template-rows: minmax(10rem, fit-content) calc(100vh - 15rem) 5rem;
   overflow: hidden;
-}
 
-.word-list-wrapper > div {
-  padding: 1rem 2rem;
-}
+  > div {
+    padding: 1rem 2rem;
+  }
 
-.words-container {
-  max-height: calc(100vh - 10rem);
-  overflow-y: scroll;
-}
+  .words-container {
+    max-height: calc(100vh - 10rem);
+    overflow-y: scroll;
 
-.words {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1em;
-}
+    .words {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+  }
 
-.form-container {
-  display: flex;
-  flex-direction: row;
-  gap: 1em;
-  align-items: flex-end
-
+  .form-container {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    align-items: flex-end;
+  }
 }
 </style>
-
