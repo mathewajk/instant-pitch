@@ -33,6 +33,11 @@ export const useWordStore = defineStore('word', () => {
     db.transact(db.tx.words[word.id].create(word));
   }
 
+  const updateWord = (word: Word) => {
+    // @ts-ignore
+    db.transact(db.tx.words[word.id].update(word));
+  }
+
   const getMorae = (yomi: string) => {
     let chars = yomi.split('');
     let morae = [];
@@ -104,5 +109,5 @@ export const useWordStore = defineStore('word', () => {
   const isNakadaka = (word: Word) => !isHeiban(word) && !isAtamadaka(word) && !isOdaka(word);
   const isOdaka = (word: Word) => !isAtamadaka(word) && word.pitch === getMorae(word.yomi).length;
 
-  return { getMorae, isHeiban, isAtamadaka, isNakadaka, isOdaka, subscribe, createWord, startLoading, stopLoading, getActiveWord, getAllWords, findPreviousWord, findNextWord, loading, activeWord, previousWord, nextWord}
+  return { getMorae, isHeiban, isAtamadaka, isNakadaka, isOdaka, subscribe, createWord, updateWord, startLoading, stopLoading, getActiveWord, getAllWords, findPreviousWord, findNextWord, loading, activeWord, previousWord, nextWord}
 })

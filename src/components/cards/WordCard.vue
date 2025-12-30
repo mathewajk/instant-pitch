@@ -1,21 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { RouterLink } from 'vue-router';
+import { useModal } from 'vue-final-modal';
 
 import WordCardFront from './WordCardFront.vue'
 import WordCardBack from './WordCardBack.vue'
+import WordForm from '../words/WordForm.vue';
 
+import { useUserStore } from '@/stores/user';
 import type { Word } from '@/stores/word';
 
-defineProps<{
+const props = defineProps<{
     word: Word
 }>()
 
+const userStore = useUserStore();
 const flipped = ref(false);
 const showEnglish = ref(false);
+const wordToEdit = ref<Word | undefined>(undefined);
 
 const emit = defineEmits<{
     showDetails: []
 }>()
+
+const { open: openEditModal, close: closeEditModal } = useModal({
+  component: WordForm,
+  attrs: computed(() => ({
+    word: wordToEdit.value,
+    onClose() {
+      closeEditModal()
+      wordToEdit.value = undefined;
+    },
+  })),
+});
 
 const starWord = () => {
     console.log('starWord');
@@ -24,6 +41,11 @@ const starWord = () => {
 const toggleLanguage = () => {
     showEnglish.value = !showEnglish.value;
 }
+
+const editWord = () => {
+    wordToEdit.value = props.word;
+    openEditModal();
+}
 </script>
 
 <template>
@@ -31,6 +53,9 @@ const toggleLanguage = () => {
         <div class="card-actions">
             <a v-if="flipped" href="#" class="language-button" @click.stop="toggleLanguage">
                 <img src="/src/assets/icons/language.svg" alt="Toggle language" />
+            </a>
+            <a v-if="userStore.isAdmin" href="#" class="edit-button" @click.stop="editWord">
+                <img src="/src/assets/icons/pencil.svg" alt="Edit" />
             </a>
             <a href="#" class="star-button" @click.stop="starWord">
                 <img src="/src/assets/icons/star-empty.svg" alt="Star" />

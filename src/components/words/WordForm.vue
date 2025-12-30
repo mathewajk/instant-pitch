@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { id } from '@instantdb/core';
 import { VueFinalModal } from 'vue-final-modal'
 
 import { useWordStore } from '@/stores/word';
 import type { Word } from '@/stores/word';
 const store = useWordStore();
+
+const props = defineProps<{
+  word?: Word
+}>();
 
 const createEmptyWord = (): Word => ({
   id: id(),
@@ -20,6 +24,23 @@ const createEmptyWord = (): Word => ({
 
 const newWord = ref<Word>(createEmptyWord());
 const formErrors = ref<{ field: string, message: string }[]>([]);
+
+const initializeForm = () => {
+  if (props.word) {
+    newWord.value = { ...props.word };
+  } else {
+    newWord.value = createEmptyWord();
+  }
+  formErrors.value = [];
+};
+
+onMounted(() => {
+  initializeForm();
+});
+
+watch(() => props.word, () => {
+  initializeForm();
+}, { immediate: true });
 
 const validateForm = () => {
   formErrors.value = [];
@@ -43,8 +64,15 @@ const handleSubmit = () => {
   if (formErrors.value.length > 0) {
     return;
   }
-  store.createWord(newWord.value);
+  if (props.word) {
+    // Editing existing word
+    store.updateWord(newWord.value);
+  } else {
+    // Creating new word
+    store.createWord(newWord.value);
+  }
   newWord.value = createEmptyWord();
+  emit('close');
 };
 
 const emit = defineEmits<{
@@ -62,7 +90,8 @@ const emit = defineEmits<{
     <img src="/src/assets/icons/xmark.svg" alt="Close" />
   </a>
   <form @submit.prevent="handleSubmit">
-    <h1>Add Word</h1>
+    <h1>{{ word ? 'Edit Word' : 'Add Word' }}</h1>
+    <input type="hidden" v-model="newWord.id" />
     <div class="form-container">
       <div class="form-row">
         <div class="form-group">
@@ -116,7 +145,7 @@ const emit = defineEmits<{
         </div>
       </div>
       <div class="form-group">
-        <button type="submit">Add</button>
+        <button type="submit">{{ word ? 'Save' : 'Add' }}</button>
       </div>
     </div>
   </form>
