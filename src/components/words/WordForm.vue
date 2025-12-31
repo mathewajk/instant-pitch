@@ -25,6 +25,22 @@ const createEmptyWord = (): Word => ({
 const newWord = ref<Word>(createEmptyWord());
 const formErrors = ref<{ field: string, message: string }[]>([]);
 
+const sanitizeWord = (word: Word): Word => {
+  const trimField = (v: any) => (typeof v === 'string' ? v.trim() : v ?? '');
+  const stripSpaces = (v: any) => (typeof v === 'string' ? v.replace(/\s+/g, '') : v ?? '');
+
+  return {
+    ...word,
+    tango: stripSpaces(word.tango),
+    yomi: stripSpaces(word.yomi),
+    pitch: Number(word.pitch) || 0,
+    source: trimField(word.source),
+    definition_ja: trimField(word.definition_ja),
+    definition_en: trimField(word.definition_en),
+    context: trimField(word.context),
+  };
+};
+
 const initializeForm = () => {
   if (props.word) {
     newWord.value = { ...props.word };
@@ -60,6 +76,7 @@ const getErrorMessage = (field: string) => {
 }
 
 const handleSubmit = () => {
+  newWord.value = sanitizeWord(newWord.value);
   validateForm();
   if (formErrors.value.length > 0) {
     return;
