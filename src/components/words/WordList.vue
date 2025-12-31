@@ -44,7 +44,6 @@ const search = ref('');
         <PitchFilter @change="filterByPitch = $event" />
         <input id="search" type="text" v-model="search" placeholder="単語を検索" />
         <button @click="open">Add words</button>
-        <RouterLink to="/review" class="review-button">Review</RouterLink>
     </div>
     <div class="words-container" v-if="!isLoading">
         <div class="words" v-if="filteredWords && filteredWords.length > 0">
