@@ -1,29 +1,35 @@
 <script setup lang="ts">
 import PitchMora from './PitchMora.vue'
 import { useWordStore } from '@/stores/word';
+import { computed } from 'vue';
 
 const { getMorae } = useWordStore();
 
-defineProps<{
+const props = defineProps<{
     yomi: string,
-    pitch: number
+    pitch?: number | null
 }>()
+
+const hasPitch = computed(() => typeof props.pitch === 'number' && !Number.isNaN(props.pitch));
 </script>
 
 <template>
-    <div class="pitch-display" :data-pitch="pitch">
+    <div class="pitch-display" v-if="hasPitch" :data-pitch="pitch">
         <template v-for="(mora, i) in getMorae(yomi)" :key="i">
             <template v-if="i === 0">
                 <PitchMora v-if="pitch === 1" :pitch="'peak'" :characters="mora?.length" :mora="mora" />
                 <PitchMora v-else :pitch="'start'" :characters="mora?.length" :mora="mora" />
             </template>
             <template v-else>
-                <PitchMora v-if="(pitch == 0 || i < pitch - 1)" :pitch="'high'" :characters="mora?.length" :mora="mora" />
-                <PitchMora v-else-if="i === pitch - 1" :pitch="'peak'" :characters="mora?.length" :mora="mora" />
+                <PitchMora v-if="(pitch == 0 || i < (pitch || 0) - 1)" :pitch="'high'" :characters="mora?.length" :mora="mora" />
+                <PitchMora v-else-if="i === (pitch || 0) - 1" :pitch="'peak'" :characters="mora?.length" :mora="mora" />
                 <PitchMora v-else :pitch="'low'" :characters="mora?.length" :mora="mora" />
             </template>
         </template>
         <span class="sr-only"> - Pitch accent: {{ pitch }}</span>
+    </div>
+    <div v-else class="pitch-display plain-yomi">
+      {{ yomi }}
     </div>
 </template>
 

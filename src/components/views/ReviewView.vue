@@ -78,7 +78,10 @@ const buildQuestions = (words: Word[]): Question[] => {
   const questions: Question[] = [];
 
   words.forEach(word => {
-    questions.push({ type: 'pitch', word, answerOptions: generatePitchOptions(word) });
+    const hasPitch = typeof word.pitch === 'number' && !Number.isNaN(word.pitch);
+    if (hasPitch) {
+      questions.push({ type: 'pitch', word, answerOptions: generatePitchOptions(word) });
+    }
     questions.push({ type: 'reading', word });
     questions.push({ type: 'kanji', word });
   });

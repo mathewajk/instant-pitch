@@ -19,6 +19,7 @@ const handleSignOut = async () => {
           <div class="nav-links">
             <RouterLink to="/">Home</RouterLink>
             <RouterLink to="/review">Review</RouterLink>
+            <RouterLink to="/sentences">Sentences</RouterLink>
           </div>
           <div class="user-actions">
             <div class="user-info">Signed in as <strong>{{ userStore.user?.email }}</strong>.</div>
@@ -29,6 +30,7 @@ const handleSignOut = async () => {
         <div class="nav-links">
           <RouterLink to="/">Home</RouterLink>
           <RouterLink to="/review">Review</RouterLink>
+          <RouterLink to="/sentences">Sentences</RouterLink>
         </div>
         <RouterLink to="/login"><button>Login</button></RouterLink>
       </div>

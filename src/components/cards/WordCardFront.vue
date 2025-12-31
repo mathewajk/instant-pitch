@@ -12,7 +12,7 @@ const props = defineProps<{
     <div class="card-front">
         <div id="word">{{ word.tango }}</div>
         <PitchDisplay :yomi="word.yomi" :pitch="word.pitch" />
-        <div id="source">
+        <div v-if="word.source" id="source">
             Source: {{ word.source }}
         </div>
     </div>

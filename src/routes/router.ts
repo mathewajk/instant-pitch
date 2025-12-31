@@ -4,6 +4,8 @@ import ListView from '../components/views/ListView.vue'
 import DetailView from '../components/views/DetailView.vue'
 import LoginView from '../components/views/LoginView.vue'
 import ReviewView from '../components/views/ReviewView.vue'
+import SentencesView from '../components/views/SentencesView.vue'
+import SentenceDetailView from '../components/views/SentenceDetailView.vue'
 
 import { useUserStore } from '@/stores/user';
 
@@ -12,6 +14,8 @@ const routes = [
   { name: 'Details', path: '/word/:tango', component: DetailView },
   { name: 'Login', path: '/login', component: LoginView },
   { name: 'Review', path: '/review', component: ReviewView },
+  { name: 'Sentences', path: '/sentences', component: SentencesView },
+  { name: 'SentenceDetail', path: '/sentence/:id', component: SentenceDetailView },
 ]
 
 const router = createRouter({
