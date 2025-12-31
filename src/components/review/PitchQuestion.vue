@@ -141,6 +141,7 @@ defineExpose({ handleKeydown });
     color: inherit;
 
     &:hover:not(:disabled) {
+      background-color: var(--button-light-hover, #f5f5f5);
       border-color: var(--mora-peak, #ff6b6b);
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

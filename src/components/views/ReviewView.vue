@@ -4,18 +4,27 @@ import { RouterLink } from 'vue-router';
 import ReviewQuestion from '../review/ReviewQuestion.vue';
 import ReviewResults from '../review/ReviewResults.vue';
 import { useWordStore } from '@/stores/word';
+import { useSentenceStore } from '@/stores/sentence';
 import type { Word } from '@/stores/word';
+import type { Sentence, SentenceWord } from '@/stores/sentence';
+import type {
+  AnswerOption,
+  QuestionType,
+  SentenceQuestionType,
+  PitchQuestionType,
+  ReadingQuestionType,
+  KanjiQuestionType,
+} from '@/components/review/types';
 
 const wordStore = useWordStore();
+const sentenceStore = useSentenceStore();
 
-type QuestionType = 'pitch' | 'reading' | 'kanji';
-type AnswerOption = { word: Word; correct: boolean };
-type Question = { word: Word; type: QuestionType; answerOptions?: AnswerOption[] };
+type Question = PitchQuestionType | ReadingQuestionType | KanjiQuestionType | SentenceQuestionType;
 
 type ReviewState = {
   questions: Question[];
   currentIndex: number;
-  answers: { word: Word; type: QuestionType; correct: boolean }[];
+  answers: { word?: Word; sentenceId?: string; type: QuestionType; correct: boolean }[];
 };
 
 const reviewState = ref<ReviewState | null>(null);
@@ -38,13 +47,33 @@ const correctAnswers = computed(() =>
 const incorrectWords = computed(() => {
   const map = new Map<string, Word>();
   reviewState.value?.answers
-    .filter(a => !a.correct)
+    .filter(a => !a.correct && a.word)
     .forEach(a => {
-      if (!map.has(a.word.id)) {
+      if (a.word && !map.has(a.word.id)) {
         map.set(a.word.id, a.word);
       }
     });
   return Array.from(map.values());
+});
+
+const incorrectSentences = computed(() => {
+  const map = new Map<string, { id: string; text: string }>();
+  reviewState.value?.answers
+    .filter(a => !a.correct && a.sentenceId)
+    .forEach(a => {
+      const sentence = allSentencesMap.value.get(a.sentenceId!);
+      if (sentence && !map.has(sentence.id)) {
+        map.set(sentence.id, { id: sentence.id, text: sentence.text });
+      }
+    });
+  return Array.from(map.values());
+});
+
+const { data: sentenceData, isLoading: sentencesLoading } = sentenceStore.getAllSentencesWithWords();
+const allSentencesMap = computed(() => {
+  const map = new Map<string, Sentence>();
+  (sentenceData.value?.sentences as Sentence[] | undefined)?.forEach(s => map.set(s.id, s));
+  return map;
 });
 
 // Generate answer options for a word (pitch question)
@@ -73,36 +102,91 @@ const generatePitchOptions = (word: Word): AnswerOption[] => {
   return options.sort(() => Math.random() - 0.5);
 };
 
-// Build the full set of questions (pitch, reading, kanji) and shuffle
-const buildQuestions = (words: Word[]): Question[] => {
+// Build word questions (pitch, reading, kanji) and shuffle
+const buildWordQuestions = (words: Word[]): Question[] => {
   const questions: Question[] = [];
 
   words.forEach(word => {
     const hasPitch = typeof word.pitch === 'number' && !Number.isNaN(word.pitch);
     if (hasPitch) {
-      questions.push({ type: 'pitch', word, answerOptions: generatePitchOptions(word) });
+      questions.push({ type: 'pitch', word, answerOptions: generatePitchOptions(word) } as PitchQuestionType);
     }
-    questions.push({ type: 'reading', word });
-    questions.push({ type: 'kanji', word });
+    questions.push({ type: 'reading', word } as ReadingQuestionType);
+    questions.push({ type: 'kanji', word } as KanjiQuestionType);
   });
 
-  // Shuffle questions so types are mixed across words
   return questions.sort(() => Math.random() - 0.5);
 };
 
+const buildSentenceQuestions = (
+  sentences: Sentence[],
+  sentencewords: SentenceWord[],
+  words: Word[]
+): SentenceQuestionType[] => {
+  const questions: SentenceQuestionType[] = [];
+  const wordMap = new Map<string, Word>();
+  words.forEach(w => wordMap.set(w.id, w));
+
+  const sentencesWithWords = sentences.filter(s =>
+    sentencewords.some(sw => sw.sentence_id === s.id)
+  );
+
+  const shuffledSentences = [...sentencesWithWords].sort(() => Math.random() - 0.5).slice(0, 2);
+
+  shuffledSentences.forEach(sentence => {
+    const sws = sentencewords
+      .filter(sw => sw.sentence_id === sentence.id)
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+    const tokens = sws
+      .map(sw => {
+        const w = wordMap.get(sw.word_id);
+        if (!w) return null;
+        return {
+          position: sw.position ?? 0,
+          word_id: sw.word_id,
+          tango: w.tango,
+          yomi: w.yomi,
+          gloss: sw.gloss,
+        };
+      })
+      .filter(Boolean) as SentenceQuestionType['words'];
+
+    tokens.forEach((_, idx) => {
+      questions.push({
+        type: 'sentence',
+        sentence_id: sentence.id,
+        sentence_text: sentence.text,
+        blankIndex: idx,
+        words: tokens,
+      });
+    });
+  });
+
+  return questions;
+};
+
 // Initialize review session
-const initializeReview = (words: Word[]) => {
-  if (words.length === 0) {
+const initializeReview = (words: Word[], sentences: Sentence[], sentencewords: SentenceWord[]) => {
+  if (words.length === 0 && sentences.length === 0) {
     isLoading.value = false;
     return;
   }
 
-  const shuffled = [...words].sort(() => Math.random() - 0.5);
-  const selectedWords = shuffled.slice(0, Math.min(10, shuffled.length));
-  const questions = buildQuestions(selectedWords);
+  const shuffledWords = [...words].sort(() => Math.random() - 0.5);
+  const selectedWords = shuffledWords.slice(0, Math.min(5, shuffledWords.length));
+  const wordQuestions = buildWordQuestions(selectedWords);
+
+  const sentenceQuestions = buildSentenceQuestions(
+    sentences,
+    sentencewords,
+    words
+  );
+
+  const allQuestions = [...wordQuestions, ...sentenceQuestions].sort(() => Math.random() - 0.5);
 
   reviewState.value = {
-    questions,
+    questions: allQuestions,
     currentIndex: 0,
     answers: [],
   };
@@ -119,18 +203,25 @@ const initializeReview = (words: Word[]) => {
 };
 
 // Handle answer
-const handleAnswer = (payload: { correct: boolean }) => {
+const handleAnswer = (payload: { correct: boolean; sentence_id?: string }) => {
   if (!reviewState.value || !currentQuestion.value) return;
 
-  // Prevent duplicate recording for the same question
   const alreadyAnswered = reviewState.value.answers.length > reviewState.value.currentIndex;
   if (alreadyAnswered) return;
 
-  reviewState.value.answers.push({
-    word: currentQuestion.value.word,
-    type: currentQuestion.value.type,
-    correct: payload.correct,
-  });
+  if (currentQuestion.value.type === 'sentence') {
+    reviewState.value.answers.push({
+      sentenceId: payload.sentence_id || (currentQuestion.value as any).sentence_id,
+      type: currentQuestion.value.type,
+      correct: payload.correct,
+    });
+  } else {
+    reviewState.value.answers.push({
+      word: (currentQuestion.value as any).word,
+      type: currentQuestion.value.type,
+      correct: payload.correct,
+    });
+  }
 };
 
 // Move to next question
@@ -150,18 +241,29 @@ const handleNext = () => {
 // Start new session
 const handleStartNew = () => {
   isLoading.value = true;
-  const { data } = wordStore.getAllWords();
+  const { data: newWordsData } = wordStore.getAllWords();
+  const { data: newSentenceData } = sentenceStore.getAllSentencesWithWords();
 
-  if (data.value?.words) {
-    const words = data.value.words as Word[];
-    initializeReview(words);
+  const readyInit = () => {
+    const words = (newWordsData.value?.words as Word[] | undefined) || [];
+    const sentences = (newSentenceData.value?.sentences as Sentence[] | undefined) || [];
+    const sws = (newSentenceData.value?.sentencewords as SentenceWord[] | undefined) || [];
+    initializeReview(words, sentences, sws);
+  };
+
+  if (newWordsData.value?.words && newSentenceData.value?.sentences) {
+    readyInit();
   } else {
-    const unwatch = watch(() => data.value?.words, (words) => {
-      if (words) {
-        initializeReview(words as Word[]);
-        unwatch();
+    const unwatch = watch(
+      () => [newWordsData.value?.words, newSentenceData.value?.sentences],
+      (vals) => {
+        const [w, s] = vals;
+        if (w && s) {
+          readyInit();
+          unwatch();
+        }
       }
-    });
+    );
   }
 };
 
@@ -171,21 +273,27 @@ const handleGlobalKeydown = (event: KeyboardEvent) => {
   questionRef.value.handleKeydown(event);
 };
 
-// Load words and initialize
-onMounted(() => {
-  const { data, isLoading: wordsLoading } = wordStore.getAllWords();
+const { data: wordsData, isLoading: wordsLoading } = wordStore.getAllWords();
 
+const sentencesList = computed(() => (sentenceData.value?.sentences as Sentence[] | undefined) || []);
+const sentenceWordsList = computed(() => (sentenceData.value?.sentencewords as SentenceWord[] | undefined) || []);
+const wordsList = computed(() => (wordsData.value?.words as Word[] | undefined) || []);
+
+// Load words and sentences and initialize
+onMounted(() => {
   watchEffect(() => {
-    if (!wordsLoading.value && data.value?.words) {
-      const words = data.value.words as Word[];
-      if (words.length > 0) {
-        initializeReview(words);
-      } else {
-        isLoading.value = false;
-      }
-    } else {
-      isLoading.value = wordsLoading.value;
+    const ready =
+      !wordsLoading.value &&
+      !sentencesLoading.value &&
+      wordsList.value &&
+      sentencesList.value;
+
+    if (!ready) {
+      isLoading.value = wordsLoading.value || sentencesLoading.value;
+      return;
     }
+
+    initializeReview(wordsList.value || [], sentencesList.value || [], sentenceWordsList.value || []);
   });
 
   window.addEventListener('keydown', handleGlobalKeydown);
@@ -220,6 +328,7 @@ onUnmounted(() => {
       :total-questions="reviewState.questions.length"
       :correct-answers="correctAnswers"
       :incorrect-words="incorrectWords"
+      :incorrect-sentences="incorrectSentences"
       @start-new="handleStartNew"
     />
   </div>

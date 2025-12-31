@@ -7,6 +7,7 @@ const props = defineProps<{
   totalQuestions: number;
   correctAnswers: number;
   incorrectWords: Word[];
+  incorrectSentences: { id: string; text: string }[];
 }>();
 
 const emit = defineEmits<{
@@ -38,6 +39,21 @@ const percentage = computed(() =>
           class="word-item"
         >
           <div class="word-tango">{{ word.tango }}</div>
+        </RouterLink>
+      </div>
+    </div>
+
+    <div v-if="incorrectSentences.length > 0" class="incorrect-sentences">
+      <h2>Sentences to Review</h2>
+      <div class="sentence-grid">
+        <RouterLink
+          v-for="sentence in incorrectSentences"
+          :key="sentence.id"
+          :to="`/sentence/${sentence.id}`"
+          target="_blank"
+          class="sentence-item"
+        >
+          <div class="sentence-text">{{ sentence.text }}</div>
         </RouterLink>
       </div>
     </div>
@@ -132,6 +148,52 @@ const percentage = computed(() =>
         font-weight: bold;
         text-align: center;
         color: var(--text-light);
+      }
+    }
+  }
+
+  .incorrect-sentences {
+    width: 100%;
+    max-width: 900px;
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1em;
+    }
+
+    .sentence-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1em;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sentence-item {
+      padding: 1em;
+      border: 1px solid #ccc;
+      border-radius: 0.5em;
+      background-color: #f9f9f9;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.2s;
+      cursor: pointer;
+
+      &:hover {
+        border-color: var(--mora-peak, #ff6b6b);
+        background-color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .sentence-text {
+        font-size: 1.1rem;
+        text-align: center;
       }
     }
   }

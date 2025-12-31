@@ -38,6 +38,15 @@ export const useSentenceStore = defineStore('sentence', () => {
     return subscribe(allQuery);
   };
 
+  const getAllSentencesWithWords = () => {
+    const query = {
+      sentences: { $: { order: { serverCreatedAt: 'desc' } } },
+      sentencewords: { $: {} },
+      words: { $: {} },
+    };
+    return subscribe(query);
+  };
+
   const getSentenceWithWords = (sentenceId: string) => {
     const query = {
       sentences: { $: { limit: 1, where: { id: sentenceId } } },
@@ -106,6 +115,6 @@ export const useSentenceStore = defineStore('sentence', () => {
     return sentenceId;
   };
 
-  return { subscribe, getAllSentences, getSentenceWithWords, createSentenceWithWords, startLoading, stopLoading, loading };
+  return { subscribe, getAllSentences, getAllSentencesWithWords, getSentenceWithWords, createSentenceWithWords, startLoading, stopLoading, loading };
 });
 

@@ -3,16 +3,19 @@ import { computed, ref } from 'vue';
 import PitchQuestion from '@/components/review/PitchQuestion.vue';
 import ReadingQuestion from '@/components/review/ReadingQuestion.vue';
 import KanjiQuestion from '@/components/review/KanjiQuestion.vue';
+import SentenceQuestion from '@/components/review/SentenceQuestion.vue';
 import type {
-  BaseQuestion,
   QuestionType,
   PitchQuestionType,
   ReadingQuestionType,
   KanjiQuestionType,
+  SentenceQuestionType,
 } from './types';
 
+type AnyQuestion = PitchQuestionType | ReadingQuestionType | KanjiQuestionType | SentenceQuestionType;
+
 const props = defineProps<{
-  question: BaseQuestion;
+  question: AnyQuestion;
 }>();
 
 const emit = defineEmits<{
@@ -25,6 +28,7 @@ const questionComponentRef = ref<any>(null);
 const isPitch = computed(() => props.question.type === 'pitch');
 const isReading = computed(() => props.question.type === 'reading');
 const isKanji = computed(() => props.question.type === 'kanji');
+const isSentence = computed(() => props.question.type === 'sentence');
 
 const handleAnswer = (payload: { correct: boolean }) => {
   emit('answer', payload);
@@ -60,9 +64,16 @@ defineExpose({ handleKeydown });
       @next="handleNext"
     />
     <KanjiQuestion
-      v-else
+      v-else-if="isKanji"
       ref="questionComponentRef"
       :question="question as KanjiQuestionType"
+      @answer="handleAnswer"
+      @next="handleNext"
+    />
+    <SentenceQuestion
+      v-else-if="isSentence"
+      ref="questionComponentRef"
+      :question="question as SentenceQuestionType"
       @answer="handleAnswer"
       @next="handleNext"
     />
