@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import WordCard from '../cards/WordCard.vue'
 import WordForm from './WordForm.vue'
 import PitchFilter from '../pitch/PitchFilter.vue'
@@ -43,6 +44,7 @@ const search = ref('');
         <PitchFilter @change="filterByPitch = $event" />
         <input id="search" type="text" v-model="search" placeholder="単語を検索" />
         <button @click="open">Add words</button>
+        <RouterLink to="/review" class="review-button">Review</RouterLink>
     </div>
     <div class="words-container" v-if="!isLoading">
         <div class="words" v-if="filteredWords && filteredWords.length > 0">
@@ -97,6 +99,22 @@ const search = ref('');
     border-radius: 0.5em;
     border: 1px solid #ccc;
     padding: 0.5em;
+  }
+
+  .review-button {
+    padding: 0.5em 1em;
+    background-color: var(--button-dark, #333);
+    color: white;
+    border: none;
+    border-radius: 0.5em;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--button-dark-hover, #555);
+    }
   }
 }
 </style>
